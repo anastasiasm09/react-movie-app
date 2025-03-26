@@ -23,9 +23,6 @@ export default function Movie() {
     if (isLoading) return <p>'Loading...'</p>;
     if (isError) return <p>`'An error has occurred: ' ${+ isError.message}`</p>
 
-    //console.log(id)
-    //console.log(data)
-
     return (
         <section>
             <h1>Movie</h1>
