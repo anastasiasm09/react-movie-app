@@ -62,11 +62,9 @@ export default function Movie() {
     if (isLoading) return <p>'Loading...'</p>;
     if (isError) return <p>`'An error has occurred: ' ${+ isError.message}`</p>
 
-    console.log(data)
-
     return (
-        <div className="w-full min-h-screen flex flex-col md:flex-row items-start gap-6 p-10 pr-[6rem] pl-[6rem] bg-white">
-            <div className="w-full md:w-1/3">
+        <div className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-6 p-10 pr-[6rem] pl-[6rem] bg-white">
+            <div className="w-dvw md:w-1/3">
                 <Image
                     alt="Movie Poster"
                     src={`https://image.tmdb.org/t/p/w500${data.poster_path}`}
@@ -93,15 +91,14 @@ export default function Movie() {
                     </div>
                 </div>
                 <p className="text-gray-700 italic leading-relaxed text-left">{data.tagline}</p>
-                <Spacer y={15} />
 
-                <div>
+                <div className="mt-2">
                     <p className="text-md font-bold mb-1">Overview</p>
                     <p className="text-gray-700 leading-relaxed text-left">{data.overview}</p>
                 </div>
-                <div>
+                <div className="mt-2">
                     <p className="text-md font-bold mb-1">Cast</p>
-                    <div className="flex gap-4 mt-2 overflow-x-auto">
+                    <div className="flex gap-4 mt-2 overflow-x-auto place-content-between">
                         {castData?.cast?.slice(0, 5).map(actor => (
                             <div key={actor.id} className="flex flex-col items-center">
                                 <Image
@@ -115,7 +112,9 @@ export default function Movie() {
                     </div>
                 </div>
             </div>
-            <HeartIcon className="w-7 h-7 text-red-500 hover:text-red-700 cursor-pointer transition" />
+            <div className="relative">
+                <HeartIcon className="absolute top-2 right-6 w-7 h-7 text-red-500 hover:text-red-700 cursor-pointer transition" />
+            </div>
         </div>
 
     )
