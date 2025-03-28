@@ -45,7 +45,7 @@ export default function Movie() {
     };
 
     const { data, isLoading, isError } = useQuery({
-        queryKey: ['repoData'],
+        queryKey: ['movieDetails', id],
         queryFn: () =>
             fetch(`https://api.themoviedb.org/3/movie/${id}`, options)
                 .then(res => res.json())
