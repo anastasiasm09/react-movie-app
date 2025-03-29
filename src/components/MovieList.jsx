@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 import { Card, CardHeader, Image } from "@heroui/react"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,29 +16,47 @@ export default function MovieList() {
         }
     };
 
-    const { data, isLoading, isError } = useQuery({
+    const { data: movieData, isLoading, isError } = useQuery({
         queryKey: ['repoData'],
         queryFn: () =>
             fetch('https://api.themoviedb.org/3/trending/movie/day?language=en-US', options)
                 .then(res => res.json())
     });
 
-    const { data: popularData } = useQuery({
+    const { data: popularData, isLoading: isPopularLoading, isError: isPopularError } = useQuery({
         queryKey: ['popularMovies'],
         queryFn: () =>
             fetch('https://api.themoviedb.org/3/movie/popular?language=en-US', options)
                 .then(res => res.json())
     });
 
-    if (isLoading) return <p>Loading...</p>;
-    if (isError) return <p>`An error has occurred: ${+ isError.message}`</p>
+    const { data: posterForFirstMovie, isLoading: isPosterLoading, isError: isPosterError } = useQuery({
+        queryKey: ['firstMoviePoster'],
+        enabled: !!movieData,
+        queryFn: () => 
+            fetch(`https://api.themoviedb.org/3/movie/${movieData.results[0].id}/images`, options)
+        .then(res => res.json())
+    })
 
-    const movies = data.results;
+    if (isLoading || isPopularLoading || isPosterLoading) return <p>Loading...</p>;
+    if (isError || isPopularError || isPosterError) return <p>`An error has occurred: ${+ isError.message}`</p>
+
+    const movies = movieData.results;
     const firstMovie = movies[0];
     const otherMovies = movies.slice(1, 5);
     const popularMovies = popularData?.results.slice(0, 5) || [];
 
-    console.log('popularMovies', popularMovies)
+    // console.log(posterForFirstMovie)
+    const firstPoster = posterForFirstMovie.backdrops[0];
+
+    //console.log(firstPoster)
+
+  //{`https://api.themoviedb.org/3/movie/$ÛÛfirstMovie.id)/images`}
+
+    // console.log(posterForFirstMovie)
+
+
+    //console.log('popularMovies', popularMovies)
 
     function handleSelectClick(id) {
         navigate(`/movies/${id}`)
@@ -51,10 +70,10 @@ export default function MovieList() {
                         <Image
                             alt={firstMovie.title}
                             className="w-full h-full object-cover"
-                            src={`https://image.tmdb.org/t/p/w500${firstMovie.poster_path}`}
+                            src={`https://image.tmdb.org/t/p/original${firstPoster.file_path}`}
                         />
-                        <CardHeader className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                            <h4 className="text-white font-bold text-2xl">{firstMovie.title}</h4>
+                        <CardHeader className="absolute flex flex-col bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                            <h4 className="text-white leading-7 font-bold text-2xl">{firstMovie.title}</h4>
                             <p className="text-white/70 text-sm">{firstMovie.genre_ids.join(', ')}</p>
                             <div className="flex items-center gap-2 mt-1">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" className="w-10" />
@@ -71,10 +90,10 @@ export default function MovieList() {
                                 className="w-full h-full object-cover"
                                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                             />
-                            <CardHeader className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                                <h4 className="text-white font-bold text-lg">{movie.title}</h4>
+                            <CardHeader className="absolute flex flex-col text-left bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                                <h4 className="text-white leading-5 font-bold text-lg">{movie.title}</h4>
                                 <p className="text-white/70 flex text-xs">{movie.genre_ids.join(', ')}</p>
-                                <div className="flex items-center gap-1 mt-1">
+                                <div className="flex gap-2 mt-1">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" className="w-6" />
                                     <p className="text-white text-sm">{movie.vote_average.toFixed(1)}</p>
                                 </div>
@@ -97,9 +116,9 @@ export default function MovieList() {
                                 />
                             </div>
                             <div className="flex flex-col text left">
-                                <h3 className="text-base">{movie.title}</h3>
+                                <h3 className="text-base leading-5">{movie.title}</h3>
                                 <p className="text-gray-500 text-xs">{movie.genre_ids.join(', ')}</p>
-                                <div className="flex gap-2 mt-5">
+                                <div className="flex gap-2 mt-1">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" className="w-6" />
                                     <p className="text-gray-500 text-xs">{movie.vote_average.toFixed(1)}</p>
                                 </div>
