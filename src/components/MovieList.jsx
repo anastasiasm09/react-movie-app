@@ -50,21 +50,20 @@ export default function MovieList() {
 
     const movies = movieData.results;
     const firstMovie = movies[0];
-    const otherMovies = movies.slice(1, 6);
+    const otherMovies = movies.slice(1, 7);
+    const lastMovie = movies[6];
     const popularMovies = popularData?.results.slice(0, 5) || [];
     const firstPoster = posterForFirstMovie.backdrops[0];
 
-    function handleSelectClick(id) {
-        navigate(`/movies/${id}`)
-    }
-
+    console.log(lastMovie)
     const genreMap = genresData?.genres.reduce((acc, genre) => {
         acc[genre.id] = genre.name;
         return acc;
     }, {}) || {};
 
-    console.log(firstMovie)
-    console.log(genresData)
+    function handleSelectClick(id) {
+        navigate(`/movies/${id}`)
+    }
 
     return (
         <div className="flex w-full min-h-screen p-8 gap-6">
@@ -74,7 +73,7 @@ export default function MovieList() {
                         isPressable
                         onPress={() => handleSelectClick(firstMovie.id)}
                         key={firstMovie.id}
-                        className="relative h-[400px] overflow-hidden shadow-lg w-full">
+                        className="relative overflow-hidden shadow-lg max-h-64 md:w-full">
                         <Image
                             alt={firstMovie.title}
                             className="w-full h-full object-cover"
@@ -90,18 +89,17 @@ export default function MovieList() {
                         </CardHeader>
                     </Card>
                 )}
-                <div className="grid grid-cols-5 md:grid-cols-5 gap-5">
-                    {otherMovies.map((movie) => (
-                        <Card isPressable onPress={() => handleSelectClick(movie.id)} key={movie.id}>
-                            <CardHeader className="absolute rounded-lg flex flex-col text-left bottom-0 left-0 right-0 bg-gradient-to-t from-black/100 to-transparent p-2">
-                                {/* <p className="text-tiny text-white/60 uppercase font-bold">{movie.title}</p> */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mx-auto w-full justify-center">
+                    {otherMovies.map((movie, index) => (
+                        <Card isPressable onPress={() => handleSelectClick(movie.id)} key={movie.id} className={index >= 5 ? "block lg:hidden" : ""}>
+                            {/* <CardHeader className="absolute rounded-lg flex flex-col text-left bottom-0 left-0 right-0 bg-gradient-to-t from-black/100 to-transparent p-2">
                                 <h4 className="text-white font-bold text-large leading-5">{movie.title}</h4>
                                 <p className="text-gray-300 text-xs">{movie.genre_ids.map((id) => genreMap[id]).join(', ')}</p>
                                 <div className="flex gap-2 mt-1">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" className="w-6" />
                                     <p className="text-white text-sm">{movie.vote_average.toFixed(1)}</p>
                                 </div>
-                            </CardHeader>
+                            </CardHeader> */}
                             <Image
                                 removeWrapper
                                 alt="Card background"
@@ -112,8 +110,8 @@ export default function MovieList() {
                     ))}
                 </div>
             </div>
-            {/* Права панель (30%) */}
-            <div className="w-1/5 p-4 bg-white rounded-lg shadow-lg">
+            {/* popular movies */}
+            <div className="w-2/5 p-4 bg-white rounded-lg shadow-lg hidden md:block">
                 <h2 className="text-gray-800 text-xl font-semibold mb-6 text-left">Popular Movies</h2>
                 <div className="space-y-4">
                     {popularMovies.map((movie) => (
@@ -126,7 +124,7 @@ export default function MovieList() {
                                 />
                             </div>
                             <div className="flex flex-col text left">
-                                <h3 className="text-base leading-5">{movie.title}</h3>
+                                <h3 className="font-extrabold text-sm leading-5">{movie.title}</h3>
                                 <p className="text-gray-500 text-xs">{movie.genre_ids.map((id) => genreMap[id]).join(', ')}</p>
                                 <div className="flex gap-2 mt-1">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" className="w-6" />
