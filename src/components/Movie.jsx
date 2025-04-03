@@ -60,18 +60,18 @@ export default function Movie() {
     });
 
     if (isLoading) return <p>'Loading...'</p>;
-    if (isError) return <p>`'An error has occurred: ' ${+ isError.message}`</p>
+    if (isError) return <p>`'An error has occurred: ' ${+ isError.message}`</p>;
 
     return (
-        <div className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-6 p-10 pr-[6rem] pl-[6rem] bg-white">
-            <div className="w-dvw md:w-1/3">
+        <div className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-6 p-10 pr-[6rem] pl-[6rem] bg-white px-8">
+            <div className="w-dvw lg:w-1/2 flex justify-center">
                 <Image
                     alt="Movie Poster"
                     src={`https://image.tmdb.org/t/p/w500${data.poster_path}`}
                     className="rounded-lg shadow-md max-w-xs"
                 />
             </div>
-            <div className="w-full md:w-2/3  -mb-0 flex flex-col gap-4">
+            <div className="w-full md:w-2/3 md:text-left flex flex-col gap-4 px-8">
                 <h2 className="text-4xl font-bold text-gray-900 text-left">{data.title}</h2>
                 <div>
                     <p className="text-gray-600 text-left font-bold">{data.genres.map(g => g.name).join(", ")}</p>
@@ -98,8 +98,8 @@ export default function Movie() {
                 </div>
                 <div className="mt-2">
                     <p className="text-md font-bold mb-1">Cast</p>
-                    <div className="flex gap-4 mt-2 overflow-x-auto place-content-between">
-                        {castData?.cast?.slice(0, 5).map(actor => (
+                    <div className="w-full grid grid-cols-3 sm:grid-cols-3 gap-4">
+                        {castData?.cast?.slice(0, 6).map(actor => (
                             <div key={actor.id} className="flex flex-col items-center">
                                 <Image
                                     alt={actor.name}
