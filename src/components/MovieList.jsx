@@ -30,11 +30,19 @@ export default function MovieList() {
                 .then(res => res.json())
     });
 
-    const { data: posterForFirstMovie, isLoading: isPosterLoading, isError: isPosterError } = useQuery({
-        queryKey: ['firstMoviePoster'],
+    const { data: bannerForFirstMovie, isLoading: isFirstBannerLoading, isError: isFirstBannerError } = useQuery({
+        queryKey: ['firstMovieBanner'],
         enabled: !!movieData,
         queryFn: () =>
             fetch(`https://api.themoviedb.org/3/movie/${movieData.results[0].id}/images`, options)
+                .then(res => res.json())
+    });
+
+    const { data: bannerForSecondMovie, isLoading: isSecondBannerLoading, isError: isSecondBannerError } = useQuery({
+        queryKey: ['secondMovieBanner'],
+        enabled: !!movieData,
+        queryFn: () =>
+            fetch(`https://api.themoviedb.org/3/movie/${movieData.results[1].id}/images`, options)
                 .then(res => res.json())
     });
 
@@ -45,17 +53,17 @@ export default function MovieList() {
                 .then(res => res.json())
     });
 
-    if (isLoading || isPopularLoading || isPosterLoading || isGenresLoading) return <p>Loading...</p>;
-    if (isError || isPopularError || isPosterError || isGenresError) return <p>`An error has occurred: ${+ isError.message}`</p>
+    if (isLoading || isPopularLoading || isFirstBannerLoading || isSecondBannerLoading || isGenresLoading) return <p>Loading...</p>;
+    if (isError || isPopularError || isFirstBannerError || isSecondBannerError || isGenresError) return <p>`An error has occurred: ${+ isError.message}`</p>
 
     const movies = movieData.results;
-    const firstMovie = movies[0];
-    const otherMovies = movies.slice(1, 7);
-    const lastMovie = movies[6];
+    const moviesBanner = movies.slice(0, 2);
+    const otherMovies = movies.slice(2, 8);
     const popularMovies = popularData?.results.slice(0, 5) || [];
-    const firstPoster = posterForFirstMovie.backdrops[0];
+    const firstBanner = bannerForFirstMovie.backdrops[0];
+    const secondBanner = bannerForSecondMovie.backdrops[0];
+    const bannersForTheFirstTwoMovies = [firstBanner, secondBanner];
 
-    console.log(lastMovie)
     const genreMap = genresData?.genres.reduce((acc, genre) => {
         acc[genre.id] = genre.name;
         return acc;
@@ -67,29 +75,35 @@ export default function MovieList() {
 
     return (
         <div className="flex w-full min-h-screen p-8 gap-6">
-            <div className="w-4/5 flex flex-col gap-4">
-                {firstMovie && (
-                    <Card
-                        isPressable
-                        onPress={() => handleSelectClick(firstMovie.id)}
-                        key={firstMovie.id}
-                        className="relative overflow-hidden shadow-lg max-h-64 md:w-full">
-                        <Image
-                            alt={firstMovie.title}
-                            className="w-full h-full object-cover"
-                            src={`https://image.tmdb.org/t/p/original${firstPoster.file_path}`}
-                        />
-                        <CardHeader className="absolute flex flex-col bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                            <h4 className="text-white leading-7 font-bold text-2xl">{firstMovie.title}</h4>
-                            <p className="text-white/70 text-sm">{firstMovie.genre_ids.map(id => genreMap[id]).join(', ')}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" className="w-10" />
-                                <p className="text-white font-medium">{firstMovie.vote_average.toFixed(1)}</p>
-                            </div>
-                        </CardHeader>
-                    </Card>
-                )}
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mx-auto w-full justify-center">
+            <div className="lg:w-4/5 flex flex-col w-full gap-4">
+                <div className="flex flex-col lg:flex-row md:flex-col sm:flex-col w-full gap-5 ">
+                    {moviesBanner.map((movie, index) => (
+                        <Card
+                            isPressable
+                            onPress={() => handleSelectClick(movie.id)}
+                            key={movie.id}
+                            className="relative overflow-hidden shadow-lg w-full max-h-48 md:max-h-64 sm:max-h-full">
+                            <Image
+                                alt={movie.title}
+                                className="w-full h-full object-cover"
+                                src={`https://image.tmdb.org/t/p/original${bannersForTheFirstTwoMovies[index].file_path}`}
+                            />
+                            <CardHeader className="absolute flex flex-col bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                                <h4 className="text-white font-bold text-lg md:text-xl sm:text-2xl truncate">{movie.title}</h4>
+                                <p className="text-white/70 text-xs md:text-sm sm:text-base truncate">{movie.genre_ids.map(id => genreMap[id]).join(', ')}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" 
+                                        alt="IMDb"
+                                        className="w-6 md:w-8 lg:w-10" />
+                                    <p className="text-white font-medium text-sm md:text-base sm:text-lg">{movie.vote_average.toFixed(1)}</p>
+                                </div>
+                            </CardHeader>
+                        </Card>
+                    )
+                    )}
+                </div>
+
+                <div className="grid w-full mx-auto grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 justify-center">
                     {otherMovies.map((movie, index) => (
                         <Card isPressable onPress={() => handleSelectClick(movie.id)} key={movie.id} className={index >= 5 ? "block lg:hidden" : ""}>
                             {/* <CardHeader className="absolute rounded-lg flex flex-col text-left bottom-0 left-0 right-0 bg-gradient-to-t from-black/100 to-transparent p-2">
@@ -111,7 +125,7 @@ export default function MovieList() {
                 </div>
             </div>
             {/* popular movies */}
-            <div className="w-2/5 p-4 bg-white rounded-lg shadow-lg hidden md:block">
+            <div className="w-1/5 p-4 bg-white rounded-lg shadow-lg hidden md:block">
                 <h2 className="text-gray-800 text-xl font-semibold mb-6 text-left">Popular Movies</h2>
                 <div className="space-y-4">
                     {popularMovies.map((movie) => (
