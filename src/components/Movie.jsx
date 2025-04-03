@@ -63,7 +63,7 @@ export default function Movie() {
     if (isError) return <p>`'An error has occurred: ' ${+ isError.message}`</p>;
 
     return (
-        <div className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-6 p-10 pr-[6rem] pl-[6rem] bg-white px-8">
+        <div className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-6 p-20 pr-[6rem] pl-[6rem] bg-white px-8">
             <div className="w-dvw lg:w-1/2 flex justify-center">
                 <Image
                     alt="Movie Poster"
@@ -94,12 +94,12 @@ export default function Movie() {
 
                 <div className="mt-2">
                     <p className="text-md font-bold mb-1">Overview</p>
-                    <p className="text-gray-700 leading-relaxed text-left">{data.overview}</p>
+                    <p className="text-gray-700 text-justify leading-relaxed text-left">{data.overview}</p>
                 </div>
                 <div className="mt-2">
                     <p className="text-md font-bold mb-1">Cast</p>
-                    <div className="w-full grid grid-cols-3 sm:grid-cols-3 gap-4">
-                        {castData?.cast?.slice(0, 6).map(actor => (
+                    <div className="w-full mx-auto grid grid-cols-5 gap-4 justify-center ">
+                        {castData?.cast?.slice(0, 5).map(actor => (
                             <div key={actor.id} className="flex flex-col items-center">
                                 <Image
                                     alt={actor.name}
