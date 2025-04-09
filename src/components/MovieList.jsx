@@ -130,7 +130,7 @@ export default function MovieList() {
                 <div className="space-y-4">
                     {popularMovies.map((movie) => (
                         <div key={movie.id} className="flex flex-row gap-4">
-                            <div className="relative flex flex-col items-start " >
+                            <div onClick={() => handleSelectClick(movie.id)} className="relative flex flex-col items-start cursor-pointer" >
                                 <Image
                                     src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
                                     alt={movie.title}
