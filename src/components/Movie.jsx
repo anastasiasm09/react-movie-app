@@ -65,9 +65,6 @@ export default function Movie() {
     const [searchParams, setSearch] = useSearchParams();
 
     
-
-    // the hook is called when the user is redirected back to the app after approving the OAuth flow;
-    // if the app was approved, then we generate the sessionId and add the movie to favorites
     useEffect(() => {  
         const isApproved = searchParams.get("approved");
         const tokenFromUrl = searchParams.get("request_token");

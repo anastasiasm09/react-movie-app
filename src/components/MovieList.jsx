@@ -106,14 +106,6 @@ export default function MovieList() {
                 <div className="grid w-full mx-auto grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 justify-center">
                     {otherMovies.map((movie, index) => (
                         <Card isPressable onPress={() => handleSelectClick(movie.id)} key={movie.id} className={index >= 5 ? "block lg:hidden" : ""}>
-                            {/* <CardHeader className="absolute rounded-lg flex flex-col text-left bottom-0 left-0 right-0 bg-gradient-to-t from-black/100 to-transparent p-2">
-                                <h4 className="text-white font-bold text-large leading-5">{movie.title}</h4>
-                                <p className="text-gray-300 text-xs">{movie.genre_ids.map((id) => genreMap[id]).join(', ')}</p>
-                                <div className="flex gap-2 mt-1">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" className="w-6" />
-                                    <p className="text-white text-sm">{movie.vote_average.toFixed(1)}</p>
-                                </div>
-                            </CardHeader> */}
                             <Image
                                 removeWrapper
                                 alt="Card background"
