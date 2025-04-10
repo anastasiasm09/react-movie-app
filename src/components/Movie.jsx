@@ -38,7 +38,6 @@ export default function Movie() {
 
     const { id } = useParams();
 
-    console.log(id)
     const options = {
         method: 'GET',
         headers: {
@@ -52,11 +51,13 @@ export default function Movie() {
         return fetch(`https://api.themoviedb.org/3/account/${accountId}/favorite?session_id=${sessionId}`, {
             ...options,
             method: 'POST',
-            body: JSON.stringify( { movie_id: movieId }), // ?
+            body: JSON.stringify( { 
+                media_type: "movie",
+                movie_id: movieId,
+                favorite: true
+            }),
         })
-        .then(res =>  {
-            return res.json()
-        })
+        .then(res => res.json());
     }
 
 
@@ -72,6 +73,7 @@ export default function Movie() {
         if (isApproved === 'true' && tokenFromUrl.length) {  //token to get session_id and account_id.
             const createSessionAndAddToFavorites = async () => {
                 const sessionId = await getSessionId(tokenFromUrl);
+                console.log(sessionId) //41effef8a6adfde6f4e36ea68108e83da0c6ebd6
                 const accountId = await getAccountId(sessionId);
                 addToFavorites({ sessionId, accountId, movieId: id })
 
@@ -136,6 +138,7 @@ export default function Movie() {
 
             const data = await response.json();
             const sessionId = data.session_id;
+            console.log(sessionId) //41effef8a6adfde6f4e36ea68108e83da0c6ebd6
             return sessionId;
 
         } catch (error) {
