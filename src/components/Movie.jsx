@@ -51,7 +51,11 @@ export default function Movie() {
         return fetch(`https://api.themoviedb.org/3/account/${accountId}/favorite?session_id=${sessionId}`, {
             ...options,
             method: 'POST',
-            body: JSON.stringify( { 
+            headers: {
+                ...options.headers,
+                'Content-Type': 'application/json',
+            },
+                body: JSON.stringify( { 
                 media_type: "movie",
                 movie_id: movieId,
                 favorite: true
