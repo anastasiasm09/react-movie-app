@@ -1,5 +1,5 @@
 import { useParams, useSearchParams } from "react-router-dom";
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Image, Spacer } from "@heroui/react";
 import { useEffect } from "react";
 
@@ -46,7 +46,12 @@ export default function Movie() {
         }
     };
 
-    function addToFavoritesRequest({sessionId, accountId, movieId}) {
+    const storedAccountId = localStorage.getItem('accountId');
+    const storedSessionId = localStorage.getItem('sessionId');
+
+    const [searchParams, setSearch] = useSearchParams();
+
+    function addToFavoritesRequest({ sessionId, accountId, movieId }) {
 
         return fetch(`https://api.themoviedb.org/3/account/${accountId}/favorite?session_id=${sessionId}`, {
             ...options,
@@ -55,37 +60,65 @@ export default function Movie() {
                 ...options.headers,
                 'Content-Type': 'application/json',
             },
-                body: JSON.stringify( { 
+            body: JSON.stringify({
                 media_type: "movie",
                 movie_id: movieId,
                 favorite: true
             }),
         })
-        .then(res => res.json());
+            .then(res => {
+                return res.json()
+            });
     }
 
 
-    const { mutateAsync: addToFavorites } = useMutation({ mutationFn: addToFavoritesRequest })
+    async function getListOfFavorites(accountId) {
+        try {
+            const response = await fetch(`https://api.themoviedb.org/3/account/${accountId}/favorite/movies`, options)
 
-    const [searchParams, setSearch] = useSearchParams();
+            if (!response.ok) {
+                const errorMessage = `API Error ${response.status}`;
+                throw new Error(errorMessage);
+            }
 
-    
-    useEffect(() => {  
+            const data = await response.json();
+            const getFavorites = data.results.map((movie) => movie.id);
+            return getFavorites;
+
+        } catch (error) {
+            console.error("Error getting request_token:", error);
+            throw error;
+        }
+    }
+
+    const queryClient = useQueryClient();
+
+    const { mutateAsync: addToFavorites } = useMutation({ 
+        mutationFn: addToFavoritesRequest,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['allFavourites']})
+        },
+     });
+
+    useEffect(() => {
         const isApproved = searchParams.get("approved");
         const tokenFromUrl = searchParams.get("request_token");
 
         if (isApproved === 'true' && tokenFromUrl.length) {  //token to get session_id and account_id.
             const createSessionAndAddToFavorites = async () => {
                 const sessionId = await getSessionId(tokenFromUrl);
-                console.log(sessionId) //41effef8a6adfde6f4e36ea68108e83da0c6ebd6
                 const accountId = await getAccountId(sessionId);
-                addToFavorites({ sessionId, accountId, movieId: id })
+                localStorage.setItem('sessionId', sessionId)
+                localStorage.setItem('accountId', accountId)
 
+                addToFavorites({ sessionId, accountId, movieId: id })
+                getListOfFavorites(accountId);
             }
             createSessionAndAddToFavorites();
         }
     }, [searchParams, id])
 
+    
     const { data, isLoading, isError } = useQuery({
         queryKey: ['movieDetails', id],
         queryFn: () =>
@@ -101,10 +134,20 @@ export default function Movie() {
         enabled: !!data
     });
 
+    const { data: favouriteMovieIds } = useQuery({
+        queryKey: ['allFavourites'],
+        queryFn: () => getListOfFavorites(storedAccountId),
+        enabled: !!storedAccountId,
+        staleTime: 30 * 60 * 1000,
+        cacheTime: 30 * 60 * 1000,
+    });
+
     if (isLoading) return <p>'Loading...'</p>;
     if (isError) return <p>`'An error has occurred: ' ${+ isError.message}`</p>;
 
-    const getRequestToken = async () => {
+    const isFavouriteMovie = favouriteMovieIds?.includes(data.id)
+
+    async function getRequestToken() {
         try {
             const response = await fetch('https://api.themoviedb.org/3/authentication/token/new', options)
 
@@ -132,7 +175,7 @@ export default function Movie() {
                     Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNjQxY2Y1NGI3ZDlhZTI2NjQ0YTQ5YWI1YzMxYmFhMyIsIm5iZiI6MTc0MjU1NjQ4OS43NTUsInN1YiI6IjY3ZGQ0ZDQ5MDQxNjg3NWFkYzY5ODNlMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.4BHTpi8ZBwBsQFQ9wSZ17es4_C6OHCQMf7dTmwWHv8o'
 
                 },
-                body: JSON.stringify({request_token: requestToken}),
+                body: JSON.stringify({ request_token: requestToken }),
             });
 
             if (!response.ok) {
@@ -142,7 +185,6 @@ export default function Movie() {
 
             const data = await response.json();
             const sessionId = data.session_id;
-            console.log(sessionId) //41effef8a6adfde6f4e36ea68108e83da0c6ebd6
             return sessionId;
 
         } catch (error) {
@@ -150,7 +192,6 @@ export default function Movie() {
             throw error;
         }
     };
-
     async function getAccountId(sessionId) {
         try {
             const response = await fetch(`https://api.themoviedb.org/3/account?session_id=${sessionId}`, options)
@@ -170,14 +211,16 @@ export default function Movie() {
         }
     };
 
-    async function onAddToFavorite(event) { // generates request_token and redirects to TMDb.
+    async function onAddToFavorite() { // generates request_token and redirects to TMDb.
 
-        const currentUrl = window.location.href;
-        const token = await getRequestToken();
-
-        window.location.assign(`https://www.themoviedb.org/authenticate/${token}?redirect_to=${currentUrl}`)
+        if (storedSessionId && storedAccountId) {
+            addToFavorites({ accountId: storedAccountId, sessionId: storedSessionId, movieId: id });
+        } else {
+            const currentUrl = window.location.href;
+            const token = await getRequestToken();
+            window.location.assign(`https://www.themoviedb.org/authenticate/${token}?redirect_to=${currentUrl}`);
+        }
     }
-
 
 
     return (
@@ -231,7 +274,11 @@ export default function Movie() {
                 </div>
             </div>
             <div className="relative">
-                <HeartIcon onClick={onAddToFavorite} className="absolute top-2 right-6 w-7 h-7 text-red-500 hover:text-red-700 cursor-pointer transition" />
+                <HeartIcon
+                    onClick={onAddToFavorite}
+                    className="absolute top-2 right-6 w-7 h-7 text-red-500 hover:text-red-700 cursor-pointer transition"
+                    fill={isFavouriteMovie ? "currentColor" : "none"}
+                />
             </div>
         </div>
 
