@@ -74,7 +74,7 @@ export default function MovieList() {
     }
 
     return (
-        <div className="flex w-full min-h-screen p-8 gap-6">
+        <div className="flex w-full min-h-screen p-4 gap-6">
             <div className="lg:w-4/5 flex flex-col w-full gap-4">
                 <div className="flex flex-col lg:flex-row md:flex-col sm:flex-col w-full gap-5 ">
                     {moviesBanner.map((movie, index) => (
@@ -118,8 +118,8 @@ export default function MovieList() {
             </div>
             {/* popular movies */}
             <div className="w-1/5 p-4 bg-white rounded-lg shadow-lg hidden md:block">
-                <h2 className="text-gray-800 text-xl font-semibold mb-6 text-left">Popular Movies</h2>
-                <div className="space-y-4">
+                <h2 className="text-gray-800 text-xl mb-4 gap-5 text-left text-red-900 font-extrabold">Popular Movies</h2>
+                <div className="space-y-4 gap-5">
                     {popularMovies.map((movie) => (
                         <div key={movie.id} className="flex flex-row gap-4">
                             <div onClick={() => handleSelectClick(movie.id)} className="relative flex flex-col items-start cursor-pointer" >
