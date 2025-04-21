@@ -2,103 +2,27 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Image, Spacer } from "@heroui/react";
 import { useEffect } from "react";
-
+import { addToFavoritesRequest, getListOfFavorites } from "../requests/favourites"
+import { getMovieCreditsRequest, getMovieDetailsRequest } from "../requests/movies";
+import { getAccountId, getRequestToken, getSessionId } from "../requests/account";
+import FavouriteButton from "./FavouriteButton";
 
 export default function Movie() {
-
-    const HeartIcon = ({
-        size = 24,
-        width,
-        height,
-        strokeWidth = 1.5,
-        fill = "none",
-        ...props
-    }) => {
-        return (
-            <svg
-                aria-hidden="true"
-                fill={fill}
-                focusable="false"
-                height={size || height}
-                role="presentation"
-                viewBox="0 0 24 24"
-                width={size || width}
-                {...props}
-            >
-                <path
-                    d="M12.62 20.81C12.28 20.93 11.72 20.93 11.38 20.81C8.48 19.82 2 15.69 2 8.68998C2 5.59998 4.49 3.09998 7.56 3.09998C9.38 3.09998 10.99 3.97998 12 5.33998C13.01 3.97998 14.63 3.09998 16.44 3.09998C19.51 3.09998 22 5.59998 22 8.68998C22 15.69 15.52 19.82 12.62 20.81Z"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={strokeWidth}
-                />
-            </svg>
-        );
-    };
-
     const { id } = useParams();
-
-    const options = {
-        method: 'GET',
-        headers: {
-            accept: 'application/json',
-            Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNjQxY2Y1NGI3ZDlhZTI2NjQ0YTQ5YWI1YzMxYmFhMyIsIm5iZiI6MTc0MjU1NjQ4OS43NTUsInN1YiI6IjY3ZGQ0ZDQ5MDQxNjg3NWFkYzY5ODNlMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.4BHTpi8ZBwBsQFQ9wSZ17es4_C6OHCQMf7dTmwWHv8o'
-        }
-    };
 
     const storedAccountId = localStorage.getItem('accountId');
     const storedSessionId = localStorage.getItem('sessionId');
 
     const [searchParams, setSearch] = useSearchParams();
 
-    function addToFavoritesRequest({ sessionId, accountId, movieId }) {
-
-        return fetch(`https://api.themoviedb.org/3/account/${accountId}/favorite?session_id=${sessionId}`, {
-            ...options,
-            method: 'POST',
-            headers: {
-                ...options.headers,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                media_type: "movie",
-                movie_id: movieId,
-                favorite: true
-            }),
-        })
-            .then(res => {
-                return res.json()
-            });
-    }
-
-
-    async function getListOfFavorites(accountId) {
-        try {
-            const response = await fetch(`https://api.themoviedb.org/3/account/${accountId}/favorite/movies`, options)
-
-            if (!response.ok) {
-                const errorMessage = `API Error ${response.status}`;
-                throw new Error(errorMessage);
-            }
-
-            const data = await response.json();
-            const getFavorites = data.results.map((movie) => movie.id);
-            return getFavorites;
-
-        } catch (error) {
-            console.error("Error getting request_token:", error);
-            throw error;
-        }
-    }
-
     const queryClient = useQueryClient();
 
-    const { mutateAsync: addToFavorites } = useMutation({ 
+    const { mutateAsync: addToFavorites } = useMutation({
         mutationFn: addToFavoritesRequest,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['allFavourites']})
+            queryClient.invalidateQueries({ queryKey: ['allFavourites'] })
         },
-     });
+    });
 
     useEffect(() => {
         const isApproved = searchParams.get("approved");
@@ -118,19 +42,15 @@ export default function Movie() {
         }
     }, [searchParams, id])
 
-    
+
     const { data, isLoading, isError } = useQuery({
         queryKey: ['movieDetails', id],
-        queryFn: () =>
-            fetch(`https://api.themoviedb.org/3/movie/${id}`, options)
-                .then(res => res.json())
+        queryFn: () => getMovieDetailsRequest(id)
     });
 
     const { data: castData } = useQuery({
         queryKey: ['movieCast', id],
-        queryFn: () =>
-            fetch(`https://api.themoviedb.org/3/movie/${id}/credits`, options)
-                .then(res => res.json()),
+        queryFn: () => getMovieCreditsRequest(id),
         enabled: !!data
     });
 
@@ -145,76 +65,17 @@ export default function Movie() {
     if (isLoading) return <p>'Loading...'</p>;
     if (isError) return <p>`'An error has occurred: ' ${+ isError.message}`</p>;
 
-    const isFavouriteMovie = favouriteMovieIds?.includes(data.id)
-
-    async function getRequestToken() {
-        try {
-            const response = await fetch('https://api.themoviedb.org/3/authentication/token/new', options)
-
-            if (!response.ok) {
-                const errorMessage = `API Error ${response.status}`;
-                throw new Error(errorMessage);
-            }
-
-            const data = await response.json();
-            const requestToken = data.request_token;
-            return requestToken;
-
-        } catch (error) {
-            console.error("Error getting request_token:", error);
-            throw error;
-        }
-    };
-
-    async function getSessionId(requestToken) {
-        try {
-            const response = await fetch('https://api.themoviedb.org/3/authentication/session/new', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNjQxY2Y1NGI3ZDlhZTI2NjQ0YTQ5YWI1YzMxYmFhMyIsIm5iZiI6MTc0MjU1NjQ4OS43NTUsInN1YiI6IjY3ZGQ0ZDQ5MDQxNjg3NWFkYzY5ODNlMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.4BHTpi8ZBwBsQFQ9wSZ17es4_C6OHCQMf7dTmwWHv8o'
-
-                },
-                body: JSON.stringify({ request_token: requestToken }),
-            });
-
-            if (!response.ok) {
-                const errorMessage = `API Error ${response.status, response.statusText}`;
-                throw new Error(errorMessage);
-            }
-
-            const data = await response.json();
-            const sessionId = data.session_id;
-            return sessionId;
-
-        } catch (error) {
-            console.error("Error getting session_id:", error);
-            throw error;
-        }
-    };
-    async function getAccountId(sessionId) {
-        try {
-            const response = await fetch(`https://api.themoviedb.org/3/account?session_id=${sessionId}`, options)
-
-            if (!response.ok) {
-                const errorMessage = `API Error ${response.status}`;
-                throw new Error(errorMessage);
-            }
-
-            const userData = await response.json();
-            const accountId = userData.id;
-            return accountId;
-
-        } catch (error) {
-            console.error("Error in getAccountDetails:", error);
-            throw error;
-        }
-    };
+    const isFavouriteMovie = favouriteMovieIds?.includes(data.id);
 
     async function onAddToFavorite() { // generates request_token and redirects to TMDb.
 
         if (storedSessionId && storedAccountId) {
-            addToFavorites({ accountId: storedAccountId, sessionId: storedSessionId, movieId: id });
+            addToFavorites({
+                accountId: storedAccountId,
+                sessionId: storedSessionId,
+                movieId: id,
+                isFavourite: true
+            });
         } else {
             const currentUrl = window.location.href;
             const token = await getRequestToken();
@@ -222,6 +83,14 @@ export default function Movie() {
         }
     }
 
+    const onRemoveFromFavourite = () => {
+        addToFavorites({
+            accountId: storedAccountId,
+            sessionId: storedSessionId,
+            movieId: id,
+            isFavourite: false
+        })
+    }
 
     return (
         <div className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-6 p-20 pr-[6rem] pl-[6rem] bg-white px-8">
@@ -274,9 +143,8 @@ export default function Movie() {
                 </div>
             </div>
             <div className="relative">
-                <HeartIcon
-                    onClick={onAddToFavorite}
-                    className="absolute top-2 right-6 w-7 h-7 text-red-500 hover:text-red-700 cursor-pointer transition"
+                <FavouriteButton
+                    onClick={isFavouriteMovie ? onRemoveFromFavourite : onAddToFavorite}
                     fill={isFavouriteMovie ? "currentColor" : "none"}
                 />
             </div>
