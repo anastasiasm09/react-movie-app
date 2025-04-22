@@ -4,7 +4,7 @@ export default function Footer() {
 
     return (
         <footer className="justify-center items-center w-full flex flex-col py-4">
-            <Tooltip content="All film-related metadata used in REACT-MOVIE-APP, including actor, director and studio names, 
+            <Tooltip className="max-w-lg text-center font-light text-[0.5rem]" content="All film-related metadata used in REACT-MOVIE-APP, including actor, director and studio names, 
                 synopses, release dates, trailers and poster art is supplied by The Movie Database (TMDb)."
             >
                 <a

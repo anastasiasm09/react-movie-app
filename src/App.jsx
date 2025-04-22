@@ -1,6 +1,5 @@
-import { HeroUIProvider } from "@heroui/react";
-import { useQuery } from "@tanstack/react-query";
-import { Link, Routes, Route } from "react-router-dom";
+import { HeroUIProvider, NavbarItem } from "@heroui/react";
+import { Routes, Route } from "react-router-dom";
 import MovieList from "./components/MovieList";
 import Movie from "./components/Movie";
 import Footer from "./components/Footer";
@@ -11,9 +10,12 @@ function App() {
   return (
     <HeroUIProvider>
       <header className="flex justify-between items-center px-8 py-4">
-      <h1 className="text-2xl font-stretch-condensed text-red-900 font-black lg:w-4/5 flex flex-col">
+        <h1 
+        className="text-2xl font-stretch-condensed text-red-900 font-black lg:w-4/5 flex flex-col">
+        <a href="/">
         {logo}
-      </h1>
+        </a>
+        </h1>
       </header>
       <main>
         <Routes>
