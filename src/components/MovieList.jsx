@@ -1,8 +1,10 @@
+import React from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Card, CardBody, CardFooter, CardHeader, Image } from "@heroui/react"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {getTrendingMoviesRequest, getPopularDataRequest, getBannerForFirstMovieRequest, getBannerForSecondMovieRequest, getGenresDataRequest} from "../requests/movies";
 import { div } from "framer-motion/client";
 
 export default function MovieList() {
@@ -18,39 +20,29 @@ export default function MovieList() {
 
     const { data: movieData, isLoading, isError } = useQuery({
         queryKey: ['repoData'],
-        queryFn: () =>
-            fetch('https://api.themoviedb.org/3/trending/movie/day?language=en-US', options)
-                .then(res => res.json())
+        queryFn: () => getTrendingMoviesRequest()
     });
 
     const { data: popularData, isLoading: isPopularLoading, isError: isPopularError } = useQuery({
         queryKey: ['popularMovies'],
-        queryFn: () =>
-            fetch('https://api.themoviedb.org/3/movie/popular?language=en-US', options)
-                .then(res => res.json())
+        queryFn: () => getPopularDataRequest()
     });
 
     const { data: bannerForFirstMovie, isLoading: isFirstBannerLoading, isError: isFirstBannerError } = useQuery({
         queryKey: ['firstMovieBanner'],
         enabled: !!movieData,
-        queryFn: () =>
-            fetch(`https://api.themoviedb.org/3/movie/${movieData.results[0].id}/images`, options)
-                .then(res => res.json())
+        queryFn: () => getBannerForFirstMovieRequest()
     });
 
     const { data: bannerForSecondMovie, isLoading: isSecondBannerLoading, isError: isSecondBannerError } = useQuery({
         queryKey: ['secondMovieBanner'],
         enabled: !!movieData,
-        queryFn: () =>
-            fetch(`https://api.themoviedb.org/3/movie/${movieData.results[1].id}/images`, options)
-                .then(res => res.json())
+        queryFn: () => getBannerForSecondMovieRequest()
     });
 
     const { data: genresData, isLoading: isGenresLoading, isError: isGenresError } = useQuery({
         queryKey: ['genres'],
-        queryFn: () =>
-            fetch('https://api.themoviedb.org/3/genre/movie/list?language=en-US', options)
-                .then(res => res.json())
+        queryFn: () => getGenresDataRequest()
     });
 
     if (isLoading || isPopularLoading || isFirstBannerLoading || isSecondBannerLoading || isGenresLoading) return <p>Loading...</p>;
