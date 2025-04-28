@@ -83,3 +83,54 @@ describe('The MovieList component', () => {
         expect(bannerImage).toHaveAttribute('src', expect.stringContaining('https://image.tmdb.org'));
     });
 });
+
+describe('Popular movies', () => {
+    test('renders popular movies with titles, genres and vote averanges', async () => {
+        movieRequest.getPopularDataRequest.mockResolvedValue({
+            results: [
+                {
+                    title: 'A Working Man',
+                    genre_ids: [28, 80, 53],
+                    vote_average: 6.3,
+                },
+                {
+                    title: 'Havoc',
+                    genre_ids: [28, 80, 53],
+                    vote_average: 6.7,
+                },
+                {
+                    title: 'A Minecraft Movie',
+                    genre_ids: [10751, 35, 12, 14],
+                    vote_average: 6.2,
+                }
+            ]
+        })
+
+        movieRequest.getGenresDataRequest.mockResolvedValue({
+            genres: [
+                { id: 28, name: 'Action' },
+                { id: 80, name: 'Crime' },
+                { id: 53, name: 'Thriller' },
+                { id: 10751, name: 'Family' },
+                { id: 35, name: 'Comedy' },
+                { id: 12, name: 'Adventure' },
+                { id: 14, name: 'Fantasy' },
+            ]
+        })
+
+        render (<MovieList />, { wrapper: TestProvidersWrapper });
+
+        await waitFor(() => {
+            expect(screen.getByText('A Working Man')).toBeInTheDocument();
+            expect(screen.getByText('Havoc')).toBeInTheDocument();
+            expect(screen.getByText('A Minecraft Movie')).toBeInTheDocument();
+
+            expect(screen.getAllByText('Action, Crime, Thriller')).toHaveLength(2);
+            expect(screen.getByText('Family, Comedy, Adventure, Fantasy')).toBeInTheDocument();
+
+            expect(screen.getByText('6.3')).toBeInTheDocument();
+            expect(screen.getByText('6.7')).toBeInTheDocument();
+            expect(screen.getByText('6.2')).toBeInTheDocument();
+        })
+    })
+})

@@ -1,22 +1,19 @@
 import React from 'react';
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
-import { Card, CardBody, CardFooter, CardHeader, Image } from "@heroui/react"
-import { useState } from "react";
+import { Card, CardHeader, Image } from "@heroui/react"
 import { useNavigate } from "react-router-dom";
 import {getTrendingMoviesRequest, getPopularDataRequest, getBannerForFirstMovieRequest, getBannerForSecondMovieRequest, getGenresDataRequest} from "../requests/movies";
-import { div } from "framer-motion/client";
 
 export default function MovieList() {
-    const navigate = useNavigate();
+     const navigate = useNavigate();
 
-    const options = {
+     const options = {
         method: 'GET',
         headers: {
             accept: 'application/json',
             Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNjQxY2Y1NGI3ZDlhZTI2NjQ0YTQ5YWI1YzMxYmFhMyIsIm5iZiI6MTc0MjU1NjQ4OS43NTUsInN1YiI6IjY3ZGQ0ZDQ5MDQxNjg3NWFkYzY5ODNlMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.4BHTpi8ZBwBsQFQ9wSZ17es4_C6OHCQMf7dTmwWHv8o'
         }
-    };
+    }; 
 
     const { data: movieData, isLoading, isError } = useQuery({
         queryKey: ['repoData'],
@@ -31,13 +28,13 @@ export default function MovieList() {
     const { data: bannerForFirstMovie, isLoading: isFirstBannerLoading, isError: isFirstBannerError } = useQuery({
         queryKey: ['firstMovieBanner'],
         enabled: !!movieData,
-        queryFn: () => getBannerForFirstMovieRequest()
+        queryFn: () => getBannerForFirstMovieRequest(movieData)
     });
 
     const { data: bannerForSecondMovie, isLoading: isSecondBannerLoading, isError: isSecondBannerError } = useQuery({
         queryKey: ['secondMovieBanner'],
         enabled: !!movieData,
-        queryFn: () => getBannerForSecondMovieRequest()
+        queryFn: () => getBannerForSecondMovieRequest(movieData)
     });
 
     const { data: genresData, isLoading: isGenresLoading, isError: isGenresError } = useQuery({
