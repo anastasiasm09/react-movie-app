@@ -1,56 +1,45 @@
+import React from 'react';
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
-import { Card, CardBody, CardFooter, CardHeader, Image } from "@heroui/react"
-import { useState } from "react";
+import { Card, CardHeader, Image } from "@heroui/react"
 import { useNavigate } from "react-router-dom";
-import { div } from "framer-motion/client";
+import {getTrendingMoviesRequest, getPopularDataRequest, getBannerForFirstMovieRequest, getBannerForSecondMovieRequest, getGenresDataRequest} from "../requests/movies";
 
 export default function MovieList() {
-    const navigate = useNavigate();
+     const navigate = useNavigate();
 
-    const options = {
+     const options = {
         method: 'GET',
         headers: {
             accept: 'application/json',
             Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNjQxY2Y1NGI3ZDlhZTI2NjQ0YTQ5YWI1YzMxYmFhMyIsIm5iZiI6MTc0MjU1NjQ4OS43NTUsInN1YiI6IjY3ZGQ0ZDQ5MDQxNjg3NWFkYzY5ODNlMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.4BHTpi8ZBwBsQFQ9wSZ17es4_C6OHCQMf7dTmwWHv8o'
         }
-    };
+    }; 
 
     const { data: movieData, isLoading, isError } = useQuery({
         queryKey: ['repoData'],
-        queryFn: () =>
-            fetch('https://api.themoviedb.org/3/trending/movie/day?language=en-US', options)
-                .then(res => res.json())
+        queryFn: () => getTrendingMoviesRequest()
     });
 
     const { data: popularData, isLoading: isPopularLoading, isError: isPopularError } = useQuery({
         queryKey: ['popularMovies'],
-        queryFn: () =>
-            fetch('https://api.themoviedb.org/3/movie/popular?language=en-US', options)
-                .then(res => res.json())
+        queryFn: () => getPopularDataRequest()
     });
 
     const { data: bannerForFirstMovie, isLoading: isFirstBannerLoading, isError: isFirstBannerError } = useQuery({
         queryKey: ['firstMovieBanner'],
         enabled: !!movieData,
-        queryFn: () =>
-            fetch(`https://api.themoviedb.org/3/movie/${movieData.results[0].id}/images`, options)
-                .then(res => res.json())
+        queryFn: () => getBannerForFirstMovieRequest(movieData)
     });
 
     const { data: bannerForSecondMovie, isLoading: isSecondBannerLoading, isError: isSecondBannerError } = useQuery({
         queryKey: ['secondMovieBanner'],
         enabled: !!movieData,
-        queryFn: () =>
-            fetch(`https://api.themoviedb.org/3/movie/${movieData.results[1].id}/images`, options)
-                .then(res => res.json())
+        queryFn: () => getBannerForSecondMovieRequest(movieData)
     });
 
     const { data: genresData, isLoading: isGenresLoading, isError: isGenresError } = useQuery({
         queryKey: ['genres'],
-        queryFn: () =>
-            fetch('https://api.themoviedb.org/3/genre/movie/list?language=en-US', options)
-                .then(res => res.json())
+        queryFn: () => getGenresDataRequest()
     });
 
     if (isLoading || isPopularLoading || isFirstBannerLoading || isSecondBannerLoading || isGenresLoading) return <p>Loading...</p>;

@@ -1,3 +1,4 @@
+import React from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Image, Spacer } from "@heroui/react";
@@ -48,11 +49,15 @@ export default function Movie() {
         queryFn: () => getMovieDetailsRequest(id)
     });
 
+    console.log(data)
+
     const { data: castData } = useQuery({
         queryKey: ['movieCast', id],
         queryFn: () => getMovieCreditsRequest(id),
         enabled: !!data
     });
+
+    console.log(castData)
 
     const { data: favouriteMovieIds } = useQuery({
         queryKey: ['allFavourites'],
