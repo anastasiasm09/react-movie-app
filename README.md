@@ -1,3 +1,4 @@
+## Introduction
 A simple and fast movie browser built with React, React Query, and Vite, using the TMDb API.
 
 ## Live Demo
@@ -5,10 +6,10 @@ A simple and fast movie browser built with React, React Query, and Vite, using t
 
 ## Features
 
-* # Browse trending and popular movies
-* # View genres and IMDb ratings
-* # Clean and responsive UI with Hero UI
-* # Data fetching with React Query
+* Browse trending and popular movies
+* View genres and IMDb ratings
+* Clean and responsive UI with Hero UI
+* Data fetching with React Query
 
 ## Tech Stack
 
