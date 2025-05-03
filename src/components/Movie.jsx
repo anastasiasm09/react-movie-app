@@ -29,7 +29,7 @@ export default function Movie() {
         const isApproved = searchParams.get("approved");
         const tokenFromUrl = searchParams.get("request_token");
 
-        if (isApproved === 'true' && tokenFromUrl.length) {  //token to get session_id and account_id.
+        if (isApproved === 'true' && tokenFromUrl.length) {
             const createSessionAndAddToFavorites = async () => {
                 const sessionId = await getSessionId(tokenFromUrl);
                 const accountId = await getAccountId(sessionId);
@@ -43,21 +43,16 @@ export default function Movie() {
         }
     }, [searchParams, id])
 
-
     const { data, isLoading, isError } = useQuery({
         queryKey: ['movieDetails', id],
         queryFn: () => getMovieDetailsRequest(id)
     });
-
-    console.log(data)
 
     const { data: castData } = useQuery({
         queryKey: ['movieCast', id],
         queryFn: () => getMovieCreditsRequest(id),
         enabled: !!data
     });
-
-    console.log(castData)
 
     const { data: favouriteMovieIds } = useQuery({
         queryKey: ['allFavourites'],
@@ -72,7 +67,7 @@ export default function Movie() {
 
     const isFavouriteMovie = favouriteMovieIds?.includes(data.id);
 
-    async function onAddToFavorite() { // generates request_token and redirects to TMDb.
+    async function onAddToFavorite() {
 
         if (storedSessionId && storedAccountId) {
             addToFavorites({
@@ -154,6 +149,5 @@ export default function Movie() {
                 />
             </div>
         </div>
-
     )
 }
