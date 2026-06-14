@@ -1,5 +1,5 @@
 ## Introduction
-A simple and fast movie browser built with React, React Query, and Vite, using the TMDb API.
+A responsive movie browsing application built with Next.js, React, React Query, and the TMDb API. Users can browse trending and popular movies, view genres, IMDb ratings, and detailed movie information.
 
 ## Live Demo
 [🎬 React Movie App](https://react-movie-app-p9f1.onrender.com)
@@ -13,7 +13,8 @@ A simple and fast movie browser built with React, React Query, and Vite, using t
 
 ## Tech Stack
 
-* **React + Vite**
+* **Next.js**
+* **React**
 * **React Query**
 * **Hero UI**
 * **Jest + React Testing Library**
