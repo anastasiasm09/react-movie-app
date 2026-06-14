@@ -1,3 +1,4 @@
+import React from 'react';
 import { Tooltip } from "@heroui/tooltip";
 
 export default function Footer() {

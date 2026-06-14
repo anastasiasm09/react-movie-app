@@ -1,4 +1,4 @@
-export const getToken = () => import.meta.env.VITE_TMDB_BEARER_TOKEN
+export const getToken = () => process.env.NEXT_PUBLIC_TMDB_BEARER_TOKEN
 
 export const requestOptions = {
     method: 'GET',

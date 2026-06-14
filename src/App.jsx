@@ -1,3 +1,4 @@
+import React from "react";
 import { HeroUIProvider, NavbarItem } from "@heroui/react";
 import { Routes, Route } from "react-router-dom";
 import MovieList from "./components/MovieList";
