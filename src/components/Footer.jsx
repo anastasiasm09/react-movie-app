@@ -1,10 +1,9 @@
 import React from 'react';
-import { Tooltip } from "@heroui/tooltip";
+import {Tooltip} from "@heroui/react";
 
 export default function Footer() {
-
     return (
-        <footer className="justify-center items-center w-full flex flex-col py-4">
+        <footer className="justify-center items-center bg-[#0e1518] w-full flex flex-col py-4">
             <Tooltip className="max-w-lg text-center font-light text-[0.5rem]" content="All film-related metadata used in REACT-MOVIE-APP, including actor, director and studio names, 
                 synopses, release dates, trailers and poster art is supplied by The Movie Database (TMDb)."
             >
@@ -21,7 +20,7 @@ export default function Footer() {
                     />
                 </a>
             </Tooltip>
-            <p className="font-light text-[0.5rem] max-w-xs">
+            <p className="font-light text-[#959ca3] text-[0.5rem] max-w-xs">
                 REACT-MOVIE-APP uses the TMDb API but is not endorsed or certified by TMDb.
             </p>
         </footer>
