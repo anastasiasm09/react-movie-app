@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import { Image, Spacer } from "@heroui/react";
+import { Spacer } from "@heroui/react";
 import { useEffect } from "react";
 import { addToFavoritesRequest, getListOfFavorites } from "../requests/favourites"
 import { getMovieCreditsRequest, getMovieDetailsRequest } from "../requests/movies";
@@ -95,17 +95,18 @@ export default function Movie() {
     return (
         <div className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-6 p-20 pr-[6rem] pl-[6rem] bg-white px-8">
             <div className="w-dvw lg:w-1/2 flex justify-center">
-                <Image
+                <img
                     alt="Movie Poster"
                     src={`https://image.tmdb.org/t/p/w500${data.poster_path}`}
                     className="rounded-lg shadow-md max-w-xs"
                 />
             </div>
-            <div className="w-full md:w-2/3 md:text-left flex flex-col gap-4 px-8">
+            <div className="w-full md:w-2/3 md:text-left flex flex-col gap-4 px-8 space-y-4">
                 <h2 className="text-4xl font-bold text-gray-900 text-left">{data.title}</h2>
                 <div>
-                    <p className="text-gray-600 text-left font-bold">{data.genres.map(g => g.name).join(", ")}</p>
-                    <Spacer y={1} />
+                    <p className="text-gray-600 text-left font-bold">
+                        {data.genres.map(g => g.name).join(", ")}</p>
+                   
                     <div className="flex text-sm">
                         <p className="text-gray-600 text-left font-bold">
                             {new Date(data.release_date).toLocaleDateString("en-GB")}
@@ -131,7 +132,7 @@ export default function Movie() {
                     <div className="w-full mx-auto grid grid-cols-5 gap-4 justify-center ">
                         {castData?.cast?.slice(0, 5).map(actor => (
                             <div key={actor.id} className="flex flex-col items-center">
-                                <Image
+                                <img
                                     alt={actor.name}
                                     src={`https://image.tmdb.org/t/p/w200${actor.profile_path}`}
                                     className="rounded-lg shadow-md w-24 h-24 object-cover"
