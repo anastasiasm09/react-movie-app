@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, Label, SearchField, Avatar, Button, Chip } from "@heroui/react"
+import { Card, CardHeader, Label, SearchField, Avatar, Button, Chip, ScrollShadow } from "@heroui/react"
 import { useNavigate } from "react-router-dom";
 import { getTrendingMoviesRequest, getPopularDataRequest, getBannerForFirstMovieRequest, getGenresDataRequest } from "../requests/movies";
 import { AiFillHome } from "react-icons/ai";
@@ -10,6 +10,7 @@ import { IoSettings } from "react-icons/io5";
 import { MdContactSupport } from "react-icons/md";
 import { Person } from "@gravity-ui/icons";
 import { GrFavorite } from "react-icons/gr";
+import { FaStar } from "react-icons/fa";
 import movieLogo from '../Image/movieLogo.png'
 
 export default function MovieList() {
@@ -49,8 +50,8 @@ export default function MovieList() {
 
     const movies = movieData.results;
     const bannerMovie = movies[0];
-    const otherMovies = movies.slice(2, 8);
-    const popularMovies = popularData?.results.slice(0, 5) || [];
+    const top10Movies = movies.slice(1, 11);
+    const popularMovies = popularData?.results.slice(0, 10);
     const firstBanner = bannerForFirstMovie.backdrops[0];
 
     const genreMap = genresData?.genres.reduce((acc, genre) => {
@@ -63,14 +64,14 @@ export default function MovieList() {
     }
 
     return (
-        <div className="flex w-full min-h-screen p-4 gap-6 bg-[#0e1518]">
-            <div className="w-1/5 p-2 bg-[#0e1518] rounded-lg hidden md:block">
+        <div className="flex w-full min-h-screen flex-col gap-6 bg-[#0e1518] p-4 md:flex-row">
+            <div className="md:w-1/5 hidden w-full rounded-lg bg-[#0e1518] p-2 md:block">
                 <h1
-                    className="text-2xl text-red-900 font-black lg:w-4/5 flex flex-col py-4 px-2 gap-5">
+                    className="text-2xl lg:w-4/5 flex flex-col py-4 px-2 gap-5">
                     <a href="/">
-                        <img src={movieLogo.src} 
-                        alt="Movie logo" 
-                        width={80}
+                        <img src={movieLogo.src}
+                            alt="Movie logo"
+                            width={80}
                         />
                     </a>
                 </h1>
@@ -97,7 +98,7 @@ export default function MovieList() {
                     </div>
                 </div>
             </div>
-            <div className="lg:w-4/5 flex flex-col w-full gap-6 pe-4">
+            <div className="flex w-full min-w-0 flex-col gap-6 md:w-4/5 md:pe-4">
                 {/* Search & Avatar Bar */}
                 <div className='flex gap-6 items-end'>
                     {/* Search */}
@@ -160,7 +161,7 @@ export default function MovieList() {
                                 <h4 className="truncate text-lg font-bold text-white md:text-2xl">
                                     {bannerMovie.title}
                                 </h4>
-                                <div className="mt-1 flex items-center gap-2">
+                                <div className="mt-2 flex items-center gap-2">
                                     <img
                                         src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg"
                                         alt="IMDb"
@@ -181,28 +182,43 @@ export default function MovieList() {
                         </CardHeader>
                     </Card>
                 </div>
-                <div className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-                    {otherMovies.map((movie, index) => (
-                        <div
-                            key={movie.id}
-                            className={`flex flex-col gap-2 ${index >= 5 ? "block lg:hidden" : ""}`}
-                        >
-                            <div
-                                onClick={() => handleSelectClick(movie.id)}
-                                className="relative overflow-hidden shadow-lg w-full aspect-[2/3] 
-                                rounded-3xl cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-                            >
-                                <img
-                                    alt={bannerMovie.title}
-                                    className="h-full w-full object-cover"
-                                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                                />
-                            </div>
-                            <h4 className="truncate text-lg font-bold text-white md:text-2xl">
-                                {otherMovies.title}
-                            </h4>
+                {/* Movies */}
+                <div className="w-full max-w-5xl min-w-0 ">
+                    <h2 className='truncate text-yellow-500 py-5 text-lg font-bold md:text-2xl'>Top 10 Today</h2>
+                    <ScrollShadow orientation="horizontal" className="w-full overflow-x-auto scrollbar-thumb-gray-600">
+                        <div className="flex flex-nowrap gap-5 pb-4">
+                            {top10Movies.map((movie, index) => (
+                                <div
+                                    key={movie.id}
+                                    className="flex w-[100px] md:w-[120px] lg:w-[160px] shrink-0 flex-col gap-1.5"
+                                >
+                                    <div
+                                        onClick={() => handleSelectClick(movie.id)}
+                                        className="relative overflow-hidden shadow-lg w-full aspect-[2/3] 
+                                        rounded-3xl cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+                                    >
+                                        <img
+                                            alt={movie.title}
+                                            className="h-full w-full object-cover"
+                                            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                                        />
+                                    </div>
+                                    <h4 className="truncate text-md font-semibold text-white md:text-lg pt-2">
+                                        {movie.title}
+                                    </h4>
+                                    <p className="truncate text-xs text-gray-300">
+                                        {movie.genre_ids.map(id => genreMap[id]).join(", ")}
+                                    </p>
+                                    <div className="flex items-center gap-2 text-yellow-500">
+                                        <FaStar />
+                                        <p className="text-sm font-medium text-white md:text-sm">
+                                            {movie.vote_average.toFixed(1)}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </ScrollShadow>
                 </div>
             </div>
         </div>
