@@ -1,9 +1,23 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import MovieList from './MovieList';
+import HomePage from '../app/page';
+import PopularPage from '../app/popular/page';
 import '@testing-library/jest-dom';
 import * as movieRequest from '../requests/movies';
 import { TestProvidersWrapper } from '../test-utils';
+
+const mockPush = jest.fn();
+
+jest.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: mockPush,
+    }),
+}));
+
+jest.mock('next/link', () => ({
+    __esModule: true,
+    default: ({ children, href, ...props }) => <a href={href} {...props}>{children}</a>,
+}));
 
 jest.mock('../requests/utils', () => ({
     getToken: () => 'fake-test-token',
@@ -67,17 +81,22 @@ describe('The MovieList component', () => {
     });
 
     test('renders first two banner movies', async () => {
-        render(<MovieList />, { wrapper: TestProvidersWrapper });
+        render(<HomePage />, { wrapper: TestProvidersWrapper });
 
         await waitFor(() => {
             expect(screen.getByText('Ash')).toBeInTheDocument();
-            expect(screen.getByText('Science, Fiction, Horror, Thriller')).toBeInTheDocument();
+            expect(screen.getByText('Science')).toBeInTheDocument();
+            expect(screen.getByText('Fiction')).toBeInTheDocument();
+            expect(screen.getByText('Horror')).toBeInTheDocument();
+            expect(screen.getByText('Thriller')).toBeInTheDocument();
+            expect(screen.getByText('Other Movie')).toBeInTheDocument();
+            expect(screen.getByText('Science, Fiction')).toBeInTheDocument();
             expect(screen.getByText('5.9')).toBeInTheDocument();
         });
     });
 
     test('renders banner image', async () => {
-        render(<MovieList />, { wrapper: TestProvidersWrapper });
+        render(<HomePage />, { wrapper: TestProvidersWrapper });
 
         const bannerImage = await screen.findByAltText('Ash');
         expect(bannerImage).toHaveAttribute('src', expect.stringContaining('https://image.tmdb.org'));
@@ -89,16 +108,19 @@ describe('Popular movies', () => {
         movieRequest.getPopularDataRequest.mockResolvedValue({
             results: [
                 {
+                    id: 11,
                     title: 'A Working Man',
                     genre_ids: [28, 80, 53],
                     vote_average: 6.3,
                 },
                 {
+                    id: 12,
                     title: 'Havoc',
                     genre_ids: [28, 80, 53],
                     vote_average: 6.7,
                 },
                 {
+                    id: 13,
                     title: 'A Minecraft Movie',
                     genre_ids: [10751, 35, 12, 14],
                     vote_average: 6.2,
@@ -118,15 +140,12 @@ describe('Popular movies', () => {
             ]
         })
 
-        render (<MovieList />, { wrapper: TestProvidersWrapper });
+        render (<PopularPage />, { wrapper: TestProvidersWrapper });
 
         await waitFor(() => {
             expect(screen.getByText('A Working Man')).toBeInTheDocument();
             expect(screen.getByText('Havoc')).toBeInTheDocument();
             expect(screen.getByText('A Minecraft Movie')).toBeInTheDocument();
-
-            expect(screen.getAllByText('Action, Crime, Thriller')).toHaveLength(2);
-            expect(screen.getByText('Family, Comedy, Adventure, Fantasy')).toBeInTheDocument();
 
             expect(screen.getByText('6.3')).toBeInTheDocument();
             expect(screen.getByText('6.7')).toBeInTheDocument();

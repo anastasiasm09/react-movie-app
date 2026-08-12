@@ -1,5 +1,7 @@
+'use client'
+
 import React from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "next/navigation";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { addToFavoritesRequest, getListOfFavorites } from "../requests/favourites"
@@ -15,15 +17,13 @@ import { FaArrowTrendUp } from "react-icons/fa6";
 import { IoSettings } from "react-icons/io5";
 import { MdContactSupport } from "react-icons/md";
 import { FaStar } from "react-icons/fa";
+import Link from "next/link";
 
 export default function Movie() {
-    const { id } = useParams();
-
-    const storedAccountId = localStorage.getItem('accountId');
-    const storedSessionId = localStorage.getItem('sessionId');
-
-    const [searchParams, setSearch] = useSearchParams();
-
+    const searchParams = useSearchParams();
+    const id = searchParams.get("id");
+    const storedAccountId = typeof window !== 'undefined' ? localStorage.getItem('accountId') : null;
+    const storedSessionId = typeof window !== 'undefined' ? localStorage.getItem('sessionId') : null;
     const queryClient = useQueryClient();
 
     const { mutateAsync: addToFavorites } = useMutation({
@@ -37,7 +37,7 @@ export default function Movie() {
         const isApproved = searchParams.get("approved");
         const tokenFromUrl = searchParams.get("request_token");
 
-        if (isApproved === 'true' && tokenFromUrl.length) {
+        if (isApproved === 'true' && tokenFromUrl?.length) {
             const createSessionAndAddToFavorites = async () => {
                 const sessionId = await getSessionId(tokenFromUrl);
                 const accountId = await getAccountId(sessionId);
@@ -49,17 +49,18 @@ export default function Movie() {
             }
             createSessionAndAddToFavorites();
         }
-    }, [searchParams, id])
+    }, [addToFavorites, id, searchParams])
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ['movieDetails', id],
-        queryFn: () => getMovieDetailsRequest(id)
+        queryFn: () => getMovieDetailsRequest(id),
+        enabled: !!id
     });
 
     const { data: castData } = useQuery({
         queryKey: ['movieCast', id],
         queryFn: () => getMovieCreditsRequest(id),
-        enabled: !!data
+        enabled: !!data && !!id
     });
 
     const { data: favouriteMovieIds } = useQuery({
@@ -70,13 +71,13 @@ export default function Movie() {
         cacheTime: 30 * 60 * 1000,
     });
 
-    if (isLoading) return <p>'Loading...'</p>;
-    if (isError) return <p>`'An error has occurred: ' ${+ isError.message}`</p>;
+    if (!id) return <p>Missing movie id.</p>;
+    if (isLoading) return <p>Loading...</p>;
+    if (isError) return <p>An error has occurred: {isError.message}</p>;
 
     const isFavouriteMovie = favouriteMovieIds?.includes(data.id);
 
     async function onAddToFavorite() {
-
         if (storedSessionId && storedAccountId) {
             addToFavorites({
                 accountId: storedAccountId,
@@ -101,23 +102,22 @@ export default function Movie() {
     }
 
     return (
-        <div className="flex w-full min-h-screen flex-col bg-[#0e1518] p-4 md:flex-row">
+        <div className="flex w-full min-h-screen bg-[#0e1518] px-6 md:px-8 py-6 gap-8 lg:gap-12">
             {/* Sidebar */}
-            <aside className="md:w-1/5 hidden w-full rounded-lg bg-[#0e1518] p-2 md:block sticky top-0">
-                <div className="py-4 px-2">
-                    <a href="/">
-                        <img src={movieLogo.src} alt="Movie logo" width={80} />
-                    </a>
-                </div>
+            <aside className="hidden md:block w-44 flex-shrink-0">
+                <h1 className="flex flex-col py-4 px-2">
+                    <img src={movieLogo.src}
+                        alt="Movie logo"
+                        width={80}
+                    />
+                </h1>
                 <nav className="mt-8">
                     <ul className="space-y-1">
                         <li>
-                            <a href="/">
-                                <div className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
-                                    <AiFillHome className="text-[#959ca3]" />
-                                    <span className="font-medium text-base text-[#959ca3] cursor-pointer">Home</span>
-                                </div>
-                            </a>
+                            <Link href="/" className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
+                                <AiFillHome className="text-[#959ca3]" />
+                                <span className="font-medium text-base text-[#959ca3] cursor-pointer">Home</span>
+                            </Link>
                         </li>
                         <li>
                             <button className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
@@ -126,10 +126,10 @@ export default function Movie() {
                             </button>
                         </li>
                         <li>
-                            <button className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
+                            <Link href="/popular" className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
                                 <FaArrowTrendUp className="text-[#959ca3]" />
-                                <span className="font-medium text-base text-[#959ca3] cursor-pointer">Popular</span>
-                            </button>
+                                <span className="font-medium text-base text-[#959ca3]">Popular</span>
+                            </Link>
                         </li>
                         <li>
                             <button className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
@@ -145,10 +145,9 @@ export default function Movie() {
                         </li>
                     </ul>
                 </nav>
-
             </aside>
             {/*  Movie */}
-            <main className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-5 lg:gap-6 mt-8 bg-[#0e1518] px-4 sm:px-6 lg:px-8">
+            <main className="w-full relative min-h-screen flex flex-col md:flex-row items-start gap-5 lg:gap-6 mt-8 bg-[#0e1518] md:w-4/5 md:pe-4">
                 <div className="w-full md:w-[380px] md:flex-none flex flex-col items-center md:items-start gap-5">
                     <div className="relative w-full max-w-[380px] mx-auto md:mx-0">
                         <img
@@ -158,7 +157,7 @@ export default function Movie() {
                         />
                     </div>
                 </div>
-                <div className="w-full min-w-0 flex-1 md:text-left flex flex-col px-0 sm:px-2 md:px-0 lg:pl-2 gap-6">
+                <div className="w-full min-w-0 flex-1 md:text-left flex flex-col sm:px-2 md:px-0 lg:pl-2 gap-6">
                     <section className="flex items-start justify-between">
                         <h1 className="text-3xl sm:text-4xl font-bold text-white text-left">{data.title}</h1>
                         <Button onClick={isFavouriteMovie ? onRemoveFromFavourite : onAddToFavorite} fill={isFavouriteMovie ? "currentColor" : "none"} className="bg-white/20 hover:bg-white text-white hover:text-black backdrop-blur-md min-w-10 w-10 h-10 p-0">
