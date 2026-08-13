@@ -15,6 +15,7 @@ import { FaStar } from "react-icons/fa";
 import movieLogo from '../Image/movieLogo.png'
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { useGenres } from '../hooks/useGenres';
 
 export default function Home() {
     const router = useRouter();
@@ -34,16 +35,8 @@ export default function Home() {
         enabled: !!movieData,
         queryFn: () => getBannerForFirstMovieRequest(movieData)
     });
-
-    const { data: genresData, isLoading: isGenresLoading, isError: isGenresError } = useQuery({
-        queryKey: ['genres'],
-        queryFn: () => getGenresDataRequest()
-    });
-
-    const genreMap = genresData?.genres.reduce((acc, genre) => {
-        acc[genre.id] = genre.name;
-        return acc;
-    }, {}) || {};
+    
+    const { genreMap, isGenresLoading, isGenresError } = useGenres();
 
     if (isLoading || isPopularLoading || isFirstBannerLoading || isGenresLoading) return <p>Loading...</p>;
     if (isError || isPopularError || isFirstBannerError || isGenresError) return <p>`An error has occurred: ${+ isError.message}`</p>

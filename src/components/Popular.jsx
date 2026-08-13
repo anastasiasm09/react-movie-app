@@ -13,6 +13,7 @@ import { IoSettings } from "react-icons/io5";
 import { MdContactSupport } from "react-icons/md";
 import { FaStar } from "react-icons/fa";
 import { Chip, ScrollShadow } from "@heroui/react"
+import { useGenres } from "../hooks/useGenres";
 
 export default function Popular() {
     const router = useRouter();
@@ -21,16 +22,7 @@ export default function Popular() {
         queryFn: () => getPopularDataRequest()
     });
     const popularMovies = popularData?.results;
-
-    const { data: genresData } = useQuery({
-        queryKey: ['genres'],
-        queryFn: () => getGenresDataRequest()
-    });
-
-    const genreMap = genresData?.genres.reduce((acc, genre) => {
-        acc[genre.id] = genre.name;
-        return acc;
-    }, {}) || {};
+    const { genreMap, isGenresLoading, isGenresError } = useGenres();
 
     function handleSelectClick(id) {
         router.push(`/movie?id=${id}`)
