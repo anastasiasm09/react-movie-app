@@ -1,3 +1,5 @@
+'use client'
+
 import React from "react";
 
 export default function FavouriteButton({ size = 24, strokeWidth = 1.5, fill = "none", onClick }) {

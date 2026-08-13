@@ -30,4 +30,19 @@ export default [
       ],
     },
   },
+  {
+    files: ['**/*.{test,spec}.{js,jsx}'],
+    languageOptions: {
+      globals: globals.jest,
+    },
+  },
+  {
+    files: ['setupTests.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
+    },
+  },
 ]

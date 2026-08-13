@@ -5,6 +5,15 @@ import '@testing-library/jest-dom';
 import * as movieRequest from '../requests/movies';
 import { TestProvidersWrapper } from '../test-utils';
 
+jest.mock('next/navigation', () => ({
+    useSearchParams: () => new URLSearchParams('id=1'),
+}));
+
+jest.mock('next/link', () => ({
+    __esModule: true,
+    default: ({ children, href, ...props }) => <a href={href} {...props}>{children}</a>,
+}));
+
 jest.mock('../requests/utils', () => ({
     getToken: () => 'fake-test-token',
     requestOptions: {
@@ -26,7 +35,12 @@ describe('The Movie component', () => {
     test('renders movie details correctly', async () => {
         movieRequest.getMovieDetailsRequest.mockResolvedValue({
             title: 'Ash',
-            genres: ['Science', 'Fiction', 'Horror', 'Thriller'],
+            genres: [
+                { id: 1, name: 'Science' },
+                { id: 2, name: 'Fiction' },
+                { id: 3, name: 'Horror' },
+                { id: 4, name: 'Thriller' },
+            ],
             release_date: "2025-03-20",
             runtime: 95,
             vote_average: 5.9,

@@ -1,7 +1,8 @@
+'use client'
+
 import React from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, Label, SearchField, Avatar, Button, Chip, ScrollShadow } from "@heroui/react"
-import { useNavigate } from "react-router-dom";
 import { getTrendingMoviesRequest, getPopularDataRequest, getBannerForFirstMovieRequest, getGenresDataRequest } from "../requests/movies";
 import { AiFillHome } from "react-icons/ai";
 import { MdFavorite } from "react-icons/md";
@@ -12,24 +13,19 @@ import { Person } from "@gravity-ui/icons";
 import { GrFavorite } from "react-icons/gr";
 import { FaStar } from "react-icons/fa";
 import movieLogo from '../Image/movieLogo.png'
+import Link from "next/link";
+import { useRouter } from 'next/navigation';
+import { useGenres } from '../hooks/useGenres';
 
-export default function MovieList() {
-    const navigate = useNavigate();
-
-    const options = {
-        method: 'GET',
-        headers: {
-            accept: 'application/json',
-            Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNjQxY2Y1NGI3ZDlhZTI2NjQ0YTQ5YWI1YzMxYmFhMyIsIm5iZiI6MTc0MjU1NjQ4OS43NTUsInN1YiI6IjY3ZGQ0ZDQ5MDQxNjg3NWFkYzY5ODNlMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.4BHTpi8ZBwBsQFQ9wSZ17es4_C6OHCQMf7dTmwWHv8o'
-        }
-    };
+export default function Home() {
+    const router = useRouter();
 
     const { data: movieData, isLoading, isError } = useQuery({
         queryKey: ['repoData'],
         queryFn: () => getTrendingMoviesRequest()
     });
 
-    const { data: popularData, isLoading: isPopularLoading, isError: isPopularError } = useQuery({
+    const { isLoading: isPopularLoading, isError: isPopularError } = useQuery({
         queryKey: ['popularMovies'],
         queryFn: () => getPopularDataRequest()
     });
@@ -39,11 +35,8 @@ export default function MovieList() {
         enabled: !!movieData,
         queryFn: () => getBannerForFirstMovieRequest(movieData)
     });
-
-    const { data: genresData, isLoading: isGenresLoading, isError: isGenresError } = useQuery({
-        queryKey: ['genres'],
-        queryFn: () => getGenresDataRequest()
-    });
+    
+    const { genreMap, isGenresLoading, isGenresError } = useGenres();
 
     if (isLoading || isPopularLoading || isFirstBannerLoading || isGenresLoading) return <p>Loading...</p>;
     if (isError || isPopularError || isFirstBannerError || isGenresError) return <p>`An error has occurred: ${+ isError.message}`</p>
@@ -51,58 +44,61 @@ export default function MovieList() {
     const movies = movieData.results;
     const bannerMovie = movies[0];
     const top10Movies = movies.slice(1, 11);
-    const popularMovies = popularData?.results.slice(0, 10);
     const firstBanner = bannerForFirstMovie.backdrops[0];
 
-    const genreMap = genresData?.genres.reduce((acc, genre) => {
-        acc[genre.id] = genre.name;
-        return acc;
-    }, {}) || {};
-
     function handleSelectClick(id) {
-        navigate(`/movies/${id}`)
+        router.push(`/movie?id=${id}`)
     }
 
     return (
-        <div className="flex w-full min-h-screen flex-col gap-6 bg-[#0e1518] p-4 md:flex-row">
-            <div className="md:w-1/5 hidden w-full rounded-lg bg-[#0e1518] p-2 md:block">
-                <h1
-                    className="text-2xl lg:w-4/5 flex flex-col py-4 px-2 gap-5">
-                    <a href="/">
-                        <img src={movieLogo.src}
-                            alt="Movie logo"
-                            width={80}
-                        />
-                    </a>
+        <div className="flex w-full min-h-screen bg-[#0e1518] px-6 md:px-8 py-6 gap-8 lg:gap-12">
+            <aside className="hidden md:block w-44 flex-shrink-0">
+                <h1 className="flex flex-col py-4 px-2">
+                    <img src={movieLogo.src}
+                        alt="Movie logo"
+                        width={80}
+                    />
                 </h1>
-                <div className="mt-8 space-y-1">
-                    <div className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
-                        <AiFillHome className="text-[#959ca3]" />
-                        <span className="font-medium text-base text-[#959ca3] cursor-pointer">Home</span>
-                    </div>
-                    <div className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
-                        <MdFavorite className="text-[#959ca3]" />
-                        <span className="font-medium text-base text-[#959ca3] cursor-pointer">Favorites</span>
-                    </div>
-                    <div className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
-                        <FaArrowTrendUp className="text-[#959ca3]" />
-                        <span className="font-medium text-base text-[#959ca3] cursor-pointer">Popular</span>
-                    </div>
-                    <div className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
-                        <IoSettings className="text-[#959ca3]" />
-                        <span className="font-medium text-base text-[#959ca3] cursor-pointer"> Settings</span>
-                    </div>
-                    <div className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
-                        <MdContactSupport className="text-[#959ca3]" />
-                        <span className="font-medium text-base text-[#959ca3] cursor-pointer">About</span>
-                    </div>
-                </div>
-            </div>
-            <div className="flex w-full min-w-0 flex-col gap-6 md:w-4/5 md:pe-4">
+                <nav className="mt-8">
+                    <ul className="space-y-1">
+                        <li>
+                            <Link href="/" className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
+                                <AiFillHome className="text-[#959ca3]" />
+                                <span className="font-medium text-base text-[#959ca3] cursor-pointer">Home</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <button className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
+                                <MdFavorite className="text-[#959ca3]" />
+                                <span className="font-medium text-base text-[#959ca3] cursor-pointer">Favorites</span>
+                            </button>
+                        </li>
+                        <li>
+                            <Link href="/popular" className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
+                                <FaArrowTrendUp className="text-[#959ca3]" />
+                                <span className="font-medium text-base text-[#959ca3]">Popular</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <button className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
+                                <IoSettings className="text-[#959ca3]" />
+                                <span className="font-medium text-base text-[#959ca3] cursor-pointer"> Settings</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button className="flex items-center py-3 px-2 gap-5 text-[#f9f8ff]">
+                                <MdContactSupport className="text-[#959ca3]" />
+                                <span className="font-medium text-base text-[#959ca3] cursor-pointer">About</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+            <div className="flex flex-1 min-w-0 flex-col gap-8">
                 {/* Search & Avatar Bar */}
                 <div className='flex gap-6 items-end'>
                     {/* Search */}
-                    <div className='flex-grow '>
+                    <div className='flex-grow'>
                         <SearchField name="search" variant='secondary'>
                             <Label>Search</Label>
                             <SearchField.Group className="bg-[#959ca3]/30 rounded-lg">
@@ -183,11 +179,11 @@ export default function MovieList() {
                     </Card>
                 </div>
                 {/* Movies */}
-                <div className="w-full max-w-5xl min-w-0 ">
+                <div className="w-full max-w-5xl min-w-0">
                     <h2 className='truncate text-yellow-500 py-5 text-lg font-bold md:text-2xl'>Top 10 Today</h2>
                     <ScrollShadow orientation="horizontal" className="w-full overflow-x-auto scrollbar-thumb-gray-600">
                         <div className="flex flex-nowrap gap-5 pb-4">
-                            {top10Movies.map((movie, index) => (
+                            {top10Movies.map((movie) => (
                                 <div
                                     key={movie.id}
                                     className="flex w-[100px] md:w-[120px] lg:w-[160px] shrink-0 flex-col gap-1.5"
