@@ -27,3 +27,12 @@ git clone https://github.com/anastasiasm09/react-movie-app.git
 cd react-movie-app
 npm install
 npm run dev
+```
+
+## Render Deployment
+
+Use these settings for a Render Static Site:
+
+* **Build Command:** `npm ci && npm run build`
+* **Publish Directory:** `out`
+* **Environment Variable:** `NEXT_PUBLIC_TMDB_BEARER_TOKEN`

@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "next dev",
     "test": "jest"
   },
   "dependencies": {

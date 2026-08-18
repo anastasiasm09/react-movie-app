@@ -68,7 +68,7 @@ export default function Movie() {
         queryFn: () => getListOfFavorites(storedAccountId),
         enabled: !!storedAccountId,
         staleTime: 30 * 60 * 1000,
-        cacheTime: 30 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
     });
 
     if (!id) return <p>Missing movie id.</p>;
@@ -152,7 +152,7 @@ export default function Movie() {
                     <div className="relative w-full max-w-[380px] mx-auto md:mx-0">
                         <img
                             alt="Movie Poster"
-                            src={`https://image.tmdb.org/t/p/w500${data.poster_path}`}
+                            src={data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '/vite.svg'}
                             className="block w-full rounded-2xl object-cover shadow-md"
                         />
                     </div>
@@ -166,7 +166,7 @@ export default function Movie() {
                     </section>
                     <section className="flex flex-col gap-6">
                         <div className="z-10 flex flex-wrap gap-2">
-                            {data.genres.map((genre) => (
+                            {(data.genres || []).map((genre) => (
                                 <Chip
                                     key={genre.id}
                                     variant="flat"
@@ -207,7 +207,7 @@ export default function Movie() {
                                     <div className="h-20 w-20 overflow-hidden rounded-full bg-white/5">
                                         <img
                                             alt={actor.name}
-                                            src={`https://image.tmdb.org/t/p/w200${actor.profile_path}`}
+                                            src={actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : '/vite.svg'}
                                             className="h-full w-full object-cover"
                                         />
                                     </div>

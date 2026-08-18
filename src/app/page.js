@@ -3,7 +3,7 @@
 import React from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, Label, SearchField, Avatar, Button, Chip, ScrollShadow } from "@heroui/react"
-import { getTrendingMoviesRequest, getPopularDataRequest, getBannerForFirstMovieRequest, getGenresDataRequest } from "../requests/movies";
+import { getTrendingMoviesRequest, getPopularDataRequest, getBannerForFirstMovieRequest } from "../requests/movies";
 import { AiFillHome } from "react-icons/ai";
 import { MdFavorite } from "react-icons/md";
 import { FaArrowTrendUp } from "react-icons/fa6";
@@ -39,12 +39,18 @@ export default function Home() {
     const { genreMap, isGenresLoading, isGenresError } = useGenres();
 
     if (isLoading || isPopularLoading || isFirstBannerLoading || isGenresLoading) return <p>Loading...</p>;
-    if (isError || isPopularError || isFirstBannerError || isGenresError) return <p>`An error has occurred: ${+ isError.message}`</p>
+    if (isError || isPopularError || isFirstBannerError || isGenresError) {
+        return <p>Unable to load movies. Check the TMDb API token and try again.</p>;
+    }
 
-    const movies = movieData.results;
+    const movies = movieData?.results || [];
+    if (!movies.length) return <p>No movies found.</p>;
+
     const bannerMovie = movies[0];
     const top10Movies = movies.slice(1, 11);
-    const firstBanner = bannerForFirstMovie.backdrops[0];
+    const firstBanner = bannerForFirstMovie?.backdrops?.[0];
+    const bannerImagePath = firstBanner?.file_path || bannerMovie.backdrop_path || bannerMovie.poster_path;
+    const bannerImageSrc = bannerImagePath ? `https://image.tmdb.org/t/p/original${bannerImagePath}` : '/vite.svg';
 
     function handleSelectClick(id) {
         router.push(`/movie?id=${id}`)
@@ -135,10 +141,10 @@ export default function Home() {
                             alt={bannerMovie.title}
                             aria-hidden="true"
                             className="absolute inset-0 h-full w-full object-cover"
-                            src={`https://image.tmdb.org/t/p/original${firstBanner.file_path}`}
+                            src={bannerImageSrc}
                         />
                         <div className="absolute top-4 left-4 z-10 flex flex-wrap gap-2 ">
-                            {bannerMovie.genre_ids.map(id => (
+                            {(bannerMovie.genre_ids || []).map(id => (
                                 <Chip
                                     key={id}
                                     variant="flat"
@@ -196,14 +202,14 @@ export default function Home() {
                                         <img
                                             alt={movie.title}
                                             className="h-full w-full object-cover"
-                                            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                                            src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/vite.svg'}
                                         />
                                     </div>
                                     <h4 className="truncate text-md font-semibold text-white md:text-lg pt-2">
                                         {movie.title}
                                     </h4>
                                     <p className="truncate text-xs text-gray-300">
-                                        {movie.genre_ids.map(id => genreMap[id]).join(", ")}
+                                        {(movie.genre_ids || []).map(id => genreMap[id]).filter(Boolean).join(", ")}
                                     </p>
                                     <div className="flex items-center gap-2 text-yellow-500">
                                         <FaStar />

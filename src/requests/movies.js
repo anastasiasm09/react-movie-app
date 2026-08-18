@@ -1,29 +1,29 @@
-import { requestOptions } from "./utils";
+import { tmdbRequest } from "./utils";
 
 export function getMovieDetailsRequest(movieId) {
-  return fetch(`https://api.themoviedb.org/3/movie/${movieId}`, requestOptions).then(res => res.json())
+  return tmdbRequest(`/movie/${movieId}`)
 }
 
 export function getMovieCreditsRequest(movieId) {
-  return fetch(`https://api.themoviedb.org/3/movie/${movieId}/credits`, requestOptions).then(res => res.json())
+  return tmdbRequest(`/movie/${movieId}/credits`)
 }
 
 export function getTrendingMoviesRequest() {
-  return fetch('https://api.themoviedb.org/3/trending/movie/day?language=en-US', requestOptions).then(res => res.json())
+  return tmdbRequest('/trending/movie/day?language=en-US')
 }
 
 export function getPopularDataRequest() {
-  return fetch('https://api.themoviedb.org/3/movie/popular?language=en-US', requestOptions).then(res => res.json())
+  return tmdbRequest('/movie/popular?language=en-US')
 };
 
 export function getBannerForFirstMovieRequest(movieData) {
-  return fetch(`https://api.themoviedb.org/3/movie/${movieData.results[0].id}/images`, requestOptions).then(res => res.json())
+  return tmdbRequest(`/movie/${movieData.results[0].id}/images`)
 }
 
 export function getBannerForSecondMovieRequest(movieData) {
-  return fetch(`https://api.themoviedb.org/3/movie/${movieData.results[1].id}/images`, requestOptions).then(res => res.json())
+  return tmdbRequest(`/movie/${movieData.results[1].id}/images`)
 }
 
 export function getGenresDataRequest() {
-  return fetch('https://api.themoviedb.org/3/genre/movie/list?language=en-US', requestOptions).then(res => res.json())
+  return tmdbRequest('/genre/movie/list?language=en-US')
 }

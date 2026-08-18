@@ -1,12 +1,11 @@
-import { requestOptions } from "./utils";
+import { getRequestOptions, tmdbRequest } from "./utils";
 
 export async function getSessionId(requestToken) {
     try {
-        const response = await fetch('https://api.themoviedb.org/3/authentication/session/new', {
-            ...requestOptions,
+        const response = await fetch('https://api.themoviedb.org/3/authentication/session/new', getRequestOptions({
             method: 'POST',
             body: JSON.stringify({ request_token: requestToken }),
-        });
+        }));
 
         if (!response.ok) {
             const errorMessage = `API Error ${response.status, response.statusText}`;
@@ -25,14 +24,7 @@ export async function getSessionId(requestToken) {
 
 export async function getAccountId(sessionId) {
     try {
-        const response = await fetch(`https://api.themoviedb.org/3/account?session_id=${sessionId}`, requestOptions)
-
-        if (!response.ok) {
-            const errorMessage = `API Error ${response.status}`;
-            throw new Error(errorMessage);
-        }
-
-        const userData = await response.json();
+        const userData = await tmdbRequest(`/account?session_id=${sessionId}`);
         const accountId = userData.id;
         return accountId;
 
@@ -44,14 +36,7 @@ export async function getAccountId(sessionId) {
 
 export async function getRequestToken() {
     try {
-        const response = await fetch('https://api.themoviedb.org/3/authentication/token/new', requestOptions)
-
-        if (!response.ok) {
-            const errorMessage = `API Error ${response.status}`;
-            throw new Error(errorMessage);
-        }
-
-        const data = await response.json();
+        const data = await tmdbRequest('/authentication/token/new');
         const requestToken = data.request_token;
         return requestToken;
 

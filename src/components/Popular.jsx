@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getPopularDataRequest, getGenresDataRequest } from "../requests/movies";
+import { getPopularDataRequest } from "../requests/movies";
 import { useRouter } from 'next/navigation';
 import movieLogo from '../Image/movieLogo.png'
 import Link from "next/link";
@@ -21,18 +21,18 @@ export default function Popular() {
         queryKey: ['popularMovies'],
         queryFn: () => getPopularDataRequest()
     });
-    const popularMovies = popularData?.results;
+    const popularMovies = popularData?.results || [];
     const { genreMap, isGenresLoading, isGenresError } = useGenres();
 
     function handleSelectClick(id) {
         router.push(`/movie?id=${id}`)
     }
 
-    if (isPopularLoading) {
+    if (isPopularLoading || isGenresLoading) {
         return <p>Loading...</p>
     }
 
-    if (isPopularError) {
+    if (isPopularError || isGenresError) {
         return <p>Something went wrong.</p>
     }
 
@@ -114,14 +114,14 @@ export default function Popular() {
                                         <img
                                             alt={movie.title}
                                             className="h-full w-full object-cover"
-                                            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                                            src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/vite.svg'}
                                         />
                                     </div>
                                     <h4 className="truncate text-md font-semibold text-white md:text-lg pt-1">
                                         {movie.title}
                                     </h4>
                                     <p className="truncate text-xs text-gray-300">
-                                        {movie.genre_ids.map(id => genreMap[id]).join(", ")}
+                                        {(movie.genre_ids || []).map(id => genreMap[id]).filter(Boolean).join(", ")}
                                     </p>
                                     <div className="flex items-center gap-2 text-yellow-500">
                                         <FaStar />
